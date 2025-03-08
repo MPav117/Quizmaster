@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace Quizmaster.Model
+namespace Quizmaster.Models
 {
     public class Quiz 
     {
@@ -16,7 +16,7 @@ namespace Quizmaster.Model
         public int QuestionCount { get; set; }
 
         [Required]
-        public List<Question>? Questions { get; } 
+        public List<QuizQuestion>? Questions { get; } 
 
         public string? Description { get; set; }
     }

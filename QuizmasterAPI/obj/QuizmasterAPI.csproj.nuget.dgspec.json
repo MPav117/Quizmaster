@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj": {}
+    "D:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj": {}
   },
   "projects": {
-    "C:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj": {
+    "D:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj",
+        "projectUniqueName": "D:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj",
         "projectName": "QuizmasterAPI",
-        "projectPath": "C:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj",
-        "packagesPath": "C:\\Users\\kosta\\.nuget\\packages\\",
-        "outputPath": "C:\\Projects\\Quizmaster\\QuizmasterAPI\\obj\\",
+        "projectPath": "D:\\Projects\\Quizmaster\\QuizmasterAPI\\QuizmasterAPI.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\Quizmaster\\QuizmasterAPI\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\kosta\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

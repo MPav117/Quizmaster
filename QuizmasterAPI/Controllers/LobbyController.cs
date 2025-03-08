@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Quizmaster.Interfaces;
 
 namespace Quizmaster.Controllers
 {
@@ -11,7 +12,7 @@ namespace Quizmaster.Controllers
     {
         private readonly ILobbyService _lobbyService;   
 
-        public LobbyController LobbyController(ILobbyService lobbyService)
+        public LobbyController(ILobbyService lobbyService)
         {
             _lobbyService = lobbyService;
         }

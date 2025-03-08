@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Quizmaster.Interfaces;
 
 namespace Quizmaster.Controllers
 {

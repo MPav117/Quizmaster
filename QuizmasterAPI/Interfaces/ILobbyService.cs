@@ -1,4 +1,6 @@
-public namespace Quizmaster.Interfaces
+using Quizmaster.Models;
+
+namespace Quizmaster.Interfaces
 {
     public interface ILobbyService 
     {

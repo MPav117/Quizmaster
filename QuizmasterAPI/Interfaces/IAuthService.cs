@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
+using Quizmaster.Models;
 
-public namespace Quizmaster.Interfaces
+namespace Quizmaster.Interfaces
 {
     public interface IAuthService
     {
