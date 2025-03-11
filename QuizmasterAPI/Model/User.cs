@@ -10,7 +10,10 @@ namespace Quizmaster.Models
         public int ID {get; set;}
 
         [Required]
-        public int Username {get; set;}
+        public required string EMail {get; set;}
+
+        [Required]
+        public required string Username {get; set;}
 
         [Required]
         public required string Password {get; set;}

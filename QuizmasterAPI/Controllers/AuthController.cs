@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Quizmaster.Interfaces;
+using Quizmaster.Datatypes;
 
 namespace Quizmaster.Controllers
 {
@@ -15,6 +16,13 @@ namespace Quizmaster.Controllers
         public AuthController(IAuthService authService)
         {
             _authService = authService;
+        }
+
+        [HttpPost("Register")]
+        public async Task<ActionResult> Register([FromBody] RegisterInfo newUserInfo)
+        {
+            var result = _authService.Register(newUserInfo);
+            return result;
         }
     }
 }
