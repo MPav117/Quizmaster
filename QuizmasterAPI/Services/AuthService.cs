@@ -7,6 +7,10 @@ using Microsoft.Identity.Client;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 namespace Quizmaster.Services
 {
@@ -14,24 +18,65 @@ namespace Quizmaster.Services
     {
         private DatabaseContext _dbContext;
         private IPasswordHasher<User> _passwordHasher;
+        private IConfiguration _configuration;
 
-        public AuthService(DatabaseContext dbContext, PasswordHasher<User> passwordHasher)
+        public AuthService(DatabaseContext dbContext, PasswordHasher<User> passwordHasher, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
-        public Task<ReturnValue<User>> GetClaimedUser()
+        public async Task<ReturnValue<User>> GetClaimedUser(StringValues authHeader)
         {
-            throw new NotImplementedException();
+            User? claimedUser = null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = authHeader.ToString();
+            jwtToken = jwtToken.Replace("Bearer ", string.Empty);
+
+            if(authHeader.Count > 0)
+            {   
+                var jsonToken = handler.ReadJwtToken(jwtToken);
+
+                var claim = jsonToken.Claims.First(e => e.Type == "UserID");
+                claimedUser = await _dbContext.Users.FindAsync(Int32.Parse(claim.Value));
+            }
+
+            if(claimedUser == null) 
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Value = claimedUser
+                };
+            }
+            else
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.OK,
+                    IsError = false,
+                    Value = claimedUser
+                };
+            }
         }
 
-        public Task<ReturnValue<JwtSecurityToken>> GetJwtSecurityToken()
+        public JwtSecurityToken GetJwtSecurityToken(User user, string key)
         {
-            throw new NotImplementedException();
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var userClaims = new [] 
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.EMail),
+                new Claim("UserID", user.ID.ToString()),
+            };
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);    
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], _configuration["Jwt:Issuer"], claims:userClaims, expires:DateTime.Now.AddMinutes(120), signingCredentials:credentials);
+
+            return token;
         }
 
-        public Task<ReturnValue<JwtSecurityToken>> Login()
+        public Task<ReturnValue<JwtSecurityToken>> Login(LoginInfo newLoginInfo)
         {
             throw new NotImplementedException();
         }
@@ -71,11 +116,6 @@ namespace Quizmaster.Services
                 IsError = false,
                 Value = "User successfully registered!"
             };
-        }
-
-        public Task<ReturnValue<string>> Register(string email, string username, string password)
-        {
-            throw new NotImplementedException();
         }
     }
 }
