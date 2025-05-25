@@ -56,6 +56,7 @@ namespace Quizmaster.Controllers
             return Ok(questions.Value);
         }
 
+        [HttpPut("UpdateQuiz")]
         public async Task<ActionResult> UpdateQuiz(Quiz quiz)
         {
             ReturnValue<Quiz> updatedQuiz = await _quizService.UpdateQuiz(quiz);
@@ -67,6 +68,7 @@ namespace Quizmaster.Controllers
             return Ok(updatedQuiz.Value);
         }
 
+        [HttpDelete("DeleteQuiz")]
         public async Task<ActionResult> DeleteQuiz(int quizID)
         {
             ReturnValue<Quiz> deletedQuiz = await _quizService.DeleteQuiz(quizID);

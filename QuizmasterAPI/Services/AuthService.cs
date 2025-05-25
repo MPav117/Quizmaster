@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.Extensions.Primitives;
 
 namespace Quizmaster.Services
 {

@@ -10,7 +10,7 @@ namespace Quizmaster.Interfaces
     {
         public Task<ReturnValue<LoginResponse>> Login(LoginInfo UserInfo);
         public Task<ReturnValue<string>> Register(RegisterInfo newUserInfo);
-        public Task<ReturnValue<User>> GetClaimedUser();
+        public Task<ReturnValue<User>> GetClaimedUser(StringValues authHeader);
         public string GenerateJwtSecurityToken(User user);
         public string RefreshJwtSecurityToken();
     }
