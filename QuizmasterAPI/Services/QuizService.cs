@@ -277,5 +277,35 @@ namespace Quizmaster.Services
                 };
             }
         }
+
+        public async Task<ReturnValue<List<QuizQuestion>>> CreateQuizQuestions(List<QuizQuestion> newQuizQuestions)
+        {
+            await _dbContext.AddRangeAsync(newQuizQuestions);
+            await _dbContext.SaveChangesAsync();
+
+            return new ReturnValue<List<QuizQuestion>>()
+            {
+                Code = HttpStatusCode.OK,
+                IsError = false,
+                Value = newQuizQuestions,
+                Message = "Successfully created new quiz questions."
+            };
+        }
+
+        public async Task<ReturnValue<List<QuizQuestion>>> DeleteQuizQuestions(List<int> questionIDs)
+        {
+            List<QuizQuestion> quizQuestions = await _dbContext.Questions.Where(q => questionIDs.Contains(q.ID)).ToListAsync();
+            _dbContext.RemoveRange(quizQuestions);
+            await _dbContext.SaveChangesAsync();
+
+            return new ReturnValue<List<QuizQuestion>>()
+            {
+                Code = HttpStatusCode.OK,
+                IsError = false,
+                Value = quizQuestions,
+                Message = "Successfully deleted quiz questions."
+            };
+        }
+
     }
 }

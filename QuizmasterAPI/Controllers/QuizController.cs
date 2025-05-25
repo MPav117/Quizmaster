@@ -1,6 +1,8 @@
 using System.Net;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Quizmaster.Datatypes;
 using Quizmaster.Interfaces;
 using Quizmaster.Models;
@@ -44,18 +46,6 @@ namespace Quizmaster.Controllers
             return Ok(quiz.Value);
         }
 
-        [HttpGet("ReadQuizQuestions/{id}")]
-        public async Task<ActionResult> ReadQuizQuestions(int id)
-        {
-            ReturnValue<List<QuizQuestion>> questions = await _quizService.GetAllQuestionsOfQuiz(id);
-            if (questions.IsError == true)
-            {
-                return BadRequest(questions.Message);
-            }
-
-            return Ok(questions.Value);
-        }
-
         [HttpPut("UpdateQuiz")]
         public async Task<ActionResult> UpdateQuiz(Quiz quiz)
         {
@@ -78,6 +68,47 @@ namespace Quizmaster.Controllers
             }
 
             return Ok(deletedQuiz.Value);
+        }
+
+        [HttpPost("CreateQuizQuestion")]
+        public async Task<ActionResult> CreateQuizQuestions([FromBody] List<QuizQuestion> quizQuestions)
+        {
+            ReturnValue<List<QuizQuestion>> createdQuizQuestions = await _quizService.CreateQuizQuestions(quizQuestions);
+            return Ok(createdQuizQuestions.Value);
+        }
+
+        [HttpGet("ReadQuestionsOfQuiz/{id}")]
+        public async Task<ActionResult> ReadQuestionsOfQuiz(int id)
+        {
+            ReturnValue<List<QuizQuestion>> questions = await _quizService.GetAllQuestionsOfQuiz(id);
+            if (questions.IsError == true)
+            {
+                return BadRequest(questions.Message);
+            }
+
+            return Ok(questions.Value);
+        }
+
+        public async Task<ActionResult> UpdateQuizQuestions(List<QuizQuestion> quizQuestions)
+        {
+            ReturnValue<List<QuizQuestion>> questions = await _quizService.UpdateQuizQuestions(quizQuestions);
+            if (questions.IsError == true)
+            {
+                return BadRequest(questions.Message);
+            }
+
+            return Ok(questions.Value);
+        }
+
+        public async Task<ActionResult> DeleteQuizQuestions(List<int> quizQuestionIDs)
+        {
+            ReturnValue<List<QuizQuestion>> deletedQuestions = await _quizService.DeleteQuizQuestions(quizQuestionIDs);
+            if (deletedQuestions.IsError == true)
+            {
+                return BadRequest(deletedQuestions.Message);
+            }
+
+            return Ok(deletedQuestions.Value);
         }
     }
 }
