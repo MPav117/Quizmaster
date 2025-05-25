@@ -1,24 +1,23 @@
 using Quizmaster.Interfaces;
 using Quizmaster.Models;
 using Quizmaster.Datatypes;
-using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Identity.Client;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 namespace Quizmaster.Services
 {
     public class AuthService : IAuthService
     {
         private DatabaseContext _dbContext;
-        private IPasswordHasher<User> _passwordHasher;
+        private IConfiguration _configuration;
 
-        public AuthService(DatabaseContext dbContext, PasswordHasher<User> passwordHasher)
+        public AuthService(DatabaseContext dbContext, IConfiguration configuration)
         {
             _dbContext = dbContext;
-            _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
         public Task<ReturnValue<User>> GetClaimedUser()
@@ -26,42 +25,87 @@ namespace Quizmaster.Services
             throw new NotImplementedException();
         }
 
-        public Task<ReturnValue<JwtSecurityToken>> GetJwtSecurityToken()
+        public string GenerateJwtSecurityToken(User user)
         {
-            throw new NotImplementedException();
+            var key = _configuration.GetSection("Jwt:Key").Get<string>();
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var userclaims = new []
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.EMail),
+                new Claim("UserID", user.ID.ToString()),
+            };
+
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], _configuration["Jwt:Issuer"], claims:userclaims, expires:DateTime.Now.AddMinutes(120), signingCredentials:credentials);
+            var writtenToken = new JwtSecurityTokenHandler().WriteToken(token);
+            return writtenToken;
         }
 
-        public Task<ReturnValue<JwtSecurityToken>> Login()
+        public async Task<ReturnValue<LoginResponse>> Login(LoginInfo loginInformation)
         {
-            throw new NotImplementedException();
+            User? user = await _dbContext.Users.FirstOrDefaultAsync(x => x.EMail == loginInformation.EMail);
+
+            if (user == null)
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.Forbidden,
+                    IsError = true,
+                    Message = "Incorrect username or password."
+                };
+            }
+
+            bool passwordIsCorrect = BCrypt.Net.BCrypt.Verify(loginInformation.Password, user.Password);
+
+            if (!passwordIsCorrect)
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.Forbidden,
+                    IsError = true,
+                    Message = "Incorrect username or password."
+                };
+            }
+
+            user.Password = "";
+            var token = GenerateJwtSecurityToken(user);
+
+            return new() {
+                Code = System.Net.HttpStatusCode.OK,
+                IsError = false,
+                Value = new LoginResponse(user, token)
+            };
         }
 
-        public Task<ReturnValue<JwtSecurityToken>> RefreshJwtSecurityToken()
+        public string RefreshJwtSecurityToken()
         {
             throw new NotImplementedException();
         }
 
         public async Task<ReturnValue<string>> Register(RegisterInfo newUserInfo)
         {
-            User? oldUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.EMail == newUserInfo.email);
+            User? oldUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.EMail == newUserInfo.EMail);
 
             if (oldUser != null)
             {
                 return new() {
                     Code = System.Net.HttpStatusCode.BadRequest,
                     IsError = true,
-                    ErrorMessage = "User already exists."
+                    Message = "User already exists."
                 };
             }
             
             User newUser = new ()
             {
-                EMail = newUserInfo.email,
-                Username = newUserInfo.username,
-                Password = ""
+                EMail = newUserInfo.EMail,
+                Username = newUserInfo.Username,
+                Password = "",
+                Level = 1,
+                Experience = 0,
+                ProfilePicture = ""
              };
 
-            newUser.Password = _passwordHasher.HashPassword(newUser, newUserInfo.password);
+            BCrypt.Net.BCrypt.GenerateSalt();
+            newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUserInfo.Password);
 
             await _dbContext.Users.AddAsync(newUser);
             await _dbContext.SaveChangesAsync();
@@ -71,11 +115,6 @@ namespace Quizmaster.Services
                 IsError = false,
                 Value = "User successfully registered!"
             };
-        }
-
-        public Task<ReturnValue<string>> Register(string email, string username, string password)
-        {
-            throw new NotImplementedException();
         }
     }
 }

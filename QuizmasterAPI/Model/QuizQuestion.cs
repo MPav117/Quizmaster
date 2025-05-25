@@ -10,9 +10,6 @@ namespace Quizmaster.Models
         public int ID { get; set; }
 
         [Required]
-        public int QuizID { get; set; }
-
-        [Required]
         public required string Question { get; set; }
 
         [Required]
@@ -21,7 +18,10 @@ namespace Quizmaster.Models
         [Required]
         public required int QuestionType { get; set; }
 
-        [Required]
-        public required string Image { get; set; }
+        public string? Image { get; set; }
+
+        [ForeignKey("Quiz")]
+        public int QuizID { get; set; }
+        public Quiz? Quiz { get; set; }
     }
 }

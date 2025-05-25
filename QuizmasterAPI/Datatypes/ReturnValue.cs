@@ -6,6 +6,6 @@ namespace Quizmaster.Datatypes {
         public HttpStatusCode Code;
         public T Value;
         public bool IsError;
-        public string ErrorMessage;
+        public string Message;
     }
 }

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Quizmaster.Models
 {
-    public class Quiz 
+    public class Quiz
     {
         [Key]
         public int ID { get; set; }
@@ -15,9 +15,13 @@ namespace Quizmaster.Models
         [Required]
         public int QuestionCount { get; set; }
 
-        [Required]
-        public List<QuizQuestion>? Questions { get; } 
-
         public string? Description { get; set; }
+
+        [Required]
+        public List<QuizQuestion>? Questions { get; }
+
+        [ForeignKey("User")]
+        public int CreatorID { get; set; }
+        public User? Creator { get; set; }
     }
 }

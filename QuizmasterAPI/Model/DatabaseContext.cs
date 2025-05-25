@@ -9,6 +9,6 @@ namespace Quizmaster.Models
         public DbSet<QuizQuestion> Questions { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
 
-        public DatabaseContext(DbContextOptions<DbContext> options) : base(options) {}
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {}
     }   
 }   

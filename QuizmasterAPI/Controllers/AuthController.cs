@@ -18,11 +18,32 @@ namespace Quizmaster.Controllers
             _authService = authService;
         }
 
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login([FromBody] LoginInfo UserInfo)
+        {
+            var result = await _authService.Login(UserInfo);
+            if (result.IsError == false)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("Register")]
         public async Task<ActionResult> Register([FromBody] RegisterInfo newUserInfo)
         {
-            var result = _authService.Register(newUserInfo);
-            return result;
+            var result = await _authService.Register(newUserInfo);
+            if (result.IsError == false)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
     }
 }
