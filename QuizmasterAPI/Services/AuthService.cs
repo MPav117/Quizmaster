@@ -20,9 +20,38 @@ namespace Quizmaster.Services
             _configuration = configuration;
         }
 
-        public Task<ReturnValue<User>> GetClaimedUser()
+        public async Task<ReturnValue<User>> GetClaimedUser(StringValues authHeader)
         {
-            throw new NotImplementedException();
+            User? claimedUser = null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = authHeader.ToString();
+            jwtToken = jwtToken.Replace("Bearer ", string.Empty);
+
+            if(authHeader.Count > 0)
+            {   
+                var jsonToken = handler.ReadJwtToken(jwtToken);
+
+                var claim = jsonToken.Claims.First(e => e.Type == "UserID");
+                claimedUser = await _dbContext.Users.FindAsync(Int32.Parse(claim.Value));
+            }
+
+            if(claimedUser == null) 
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Value = claimedUser
+                };
+            }
+            else
+            {
+                return new() {
+                    Code = System.Net.HttpStatusCode.OK,
+                    IsError = false,
+                    Value = claimedUser
+                };
+            }
         }
 
         public string GenerateJwtSecurityToken(User user)
