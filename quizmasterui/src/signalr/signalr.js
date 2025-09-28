@@ -54,20 +54,17 @@ const createConnection = async (jwtToken) => {
 export const joinLobby = async (lobbyID, userID) => {
     try {
         await connection.invoke("AddToLobby", lobbyID, userID)
-        console.log("Added to lobby!")
+        console.log("Message sent - Join lobby!")
     }
     catch(err) {
         console.error(err)
     }
 }
 
-export const leaveLobby = async () => {
-    //todo
-}
-
 export const Ready = async (lobbyID, userID) => {
     try {
         await connection.invoke("Ready")
+        console.log("Message sent - Ready!")
     }
     catch (err) {
         console.log(err)
@@ -77,6 +74,7 @@ export const Ready = async (lobbyID, userID) => {
 export const NotifyOfLobbyUpdate = async (lobbyID) => {
     try {
         await connection.invoke("NotifyOfLobbyUpdate", lobbyID)
+        console.log("Message sent - Notify of Lobby Update!")
     }
     catch (err) {
         console.log(err)
@@ -86,6 +84,7 @@ export const NotifyOfLobbyUpdate = async (lobbyID) => {
 export const Unready = async (lobbyID, userID) => {
     try {
         await connection.invoke("Unready")
+        console.log("Message sent - Not ready!")
     }
     catch (err) {
         console.log(err)
@@ -97,6 +96,7 @@ export const StartQuiz = async (lobbyID, quizID) => {
         console.log(typeof(lobbyID))
         console.log(typeof(quizID))
         await connection.invoke("StartQuiz", lobbyID, quizID)
+        console.log("Message sent - Quiz started!")
     }
     catch (err) {
         console.log(err)
@@ -106,6 +106,7 @@ export const StartQuiz = async (lobbyID, quizID) => {
 export const BuzzIn = async (lobbyID, questionID, userID) => {
     try {
         await connection.invoke("BuzzIn", lobbyID, questionID, userID)
+        console.log("Message sent - Buzzed in!")
     }
     catch (err) {
         console.log(err)
@@ -114,8 +115,8 @@ export const BuzzIn = async (lobbyID, questionID, userID) => {
 
 export const AnswerQuestion = async (lobbyID, questionID, userID, answer) => {
     try {
-
         await connection.invoke("AnswerQuestion", lobbyID, questionID, userID, answer)
+        console.log("Message sent - Answered question!")
     }
     catch (err) {
         console.log(err)

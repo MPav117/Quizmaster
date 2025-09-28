@@ -21,6 +21,31 @@ namespace Quizmaster.Services
             _configuration = configuration;
         }
 
+        public async Task<ReturnValue<User>> GetUser(int id)
+        {
+            User? user = await _dbContext.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return new()
+                {
+                    Code = System.Net.HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Value = user
+                };
+            }
+            else
+            {
+                user.Password = "";
+                return new()
+                {
+                    Code = System.Net.HttpStatusCode.OK,
+                    IsError = false,
+                    Value = user
+                };
+            }
+        }
+
         public async Task<ReturnValue<User>> GetClaimedUser(StringValues authHeader)
         {
             User? claimedUser = null;
@@ -29,17 +54,18 @@ namespace Quizmaster.Services
             var jwtToken = authHeader.ToString();
             jwtToken = jwtToken.Replace("Bearer ", string.Empty);
 
-            if(authHeader.Count > 0)
-            {   
+            if (authHeader.Count > 0)
+            {
                 var jsonToken = handler.ReadJwtToken(jwtToken);
 
                 var claim = jsonToken.Claims.First(e => e.Type == "UserID");
                 claimedUser = await _dbContext.Users.FindAsync(Int32.Parse(claim.Value));
             }
 
-            if(claimedUser == null) 
+            if (claimedUser == null)
             {
-                return new() {
+                return new()
+                {
                     Code = System.Net.HttpStatusCode.BadRequest,
                     IsError = true,
                     Value = claimedUser
@@ -47,7 +73,8 @@ namespace Quizmaster.Services
             }
             else
             {
-                return new() {
+                return new()
+                {
                     Code = System.Net.HttpStatusCode.OK,
                     IsError = false,
                     Value = claimedUser

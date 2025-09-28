@@ -274,6 +274,7 @@ namespace Quizmaster.Messaging
         public async Task EndQuiz(int lobbyID)
         {
             List<LobbySession> allSessions = await _dbContext.Sessions.Include(x => x.User).Where(x => x.LobbyID == lobbyID).ToListAsync();
+            Lobby? lobby = await _dbContext.Lobbies.FindAsync(lobbyID);
 
             foreach (LobbySession checkedSession in allSessions)
             {
@@ -287,7 +288,13 @@ namespace Quizmaster.Messaging
                     checkedSession.User.Level += 1;
                 }
             }
-                
+
+            if (lobby != null)
+            {
+                lobby.ReadyPlayers = 0;
+                _dbContext.Lobbies.Update(lobby);
+            }
+
             _dbContext.Sessions.UpdateRange(allSessions);
 
             await _dbContext.SaveChangesAsync();

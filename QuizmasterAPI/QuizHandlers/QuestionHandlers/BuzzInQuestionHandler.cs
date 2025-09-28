@@ -90,12 +90,6 @@ public class BuzzInQuestionHandler
         {
             _hub.StopTimer(lobbyID);
 
-            foreach (LobbySession checkedSession in allSessions)
-            {
-                checkedSession.Incorrect = false;
-            }
-            _dbContext.Sessions.UpdateRange(allSessions);
-
             LobbyLog? log = await _dbContext.Logs.FirstOrDefaultAsync(x => x.LobbyID == lobbyID && x.QuestionID == questionID && x.Answered == false);
             if (log == null)
             {
@@ -111,7 +105,7 @@ public class BuzzInQuestionHandler
 
             await _hub.Clients.Group(session.LobbyID.ToString()).SendAsync("onTimedOut");
 
-            await Task.Delay(4000);
+            await Task.Delay(4000, CancellationToken.None);
 
             await _hub.SendNextQuestion(lobbyID);
         }

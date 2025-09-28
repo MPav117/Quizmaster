@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import axios from 'axios';
 import { useState } from 'react';
 import { useContext } from 'react';
 import {GenericButton, MainScreenButton} from '../components/Buttons';
@@ -29,9 +30,8 @@ function MainScreen() {
         username: "",
         level: 0,
         experience: 0,
-        expPercentage: 0,
         jwtToken: "",
-        picture: ""
+        profilePicture: ""
       }
       localStorage.removeItem("QuizmasterUser")
       setUser(resetUser)
@@ -45,10 +45,28 @@ function MainScreen() {
 
   useEffect(() => {
     if(user.id != -1) {
-      setLogin(true);
+      setLogin(true)
+      handleRefresh()
     }
   }, [])
 
+  const handleRefresh = async () => {
+    await axios.get(APIUrl + `/Auth/GetUser/${user.id}`)
+        .then(response => {
+              console.log(response)
+              const refreshUser = {
+                id: user.id,
+                username: user.username,
+                level: response.data.level,
+                experience: response.data.experience,
+                jwtToken: user.jwtToken,
+                profilePicture: ""
+              }
+              setUser(refreshUser)
+              localStorage.removeItem('QuizmasterUser')
+              localStorage.setItem('QuizmasterUser', JSON.stringify(refreshUser));
+        })
+  }
   return (
     <Background>
     <div className="flex flex-row h-1/5 w-4/5 mx-auto my-auto justify-center rounded-3xl">

@@ -18,6 +18,21 @@ namespace Quizmaster.Controllers
             _authService = authService;
         }
 
+        [HttpGet("GetUser/{id}")]
+        public async Task<ActionResult> GetUser(int id)
+        {
+            var result = await _authService.GetUser(id);
+
+            if (result.IsError == false)
+            {
+                return Ok(result.Value);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("Login")]
         public async Task<ActionResult> Login([FromBody] LoginInfo UserInfo)
         {

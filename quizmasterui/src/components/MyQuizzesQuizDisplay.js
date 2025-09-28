@@ -8,8 +8,8 @@ export default function MyQuizzesQuizDisplay({quiz, onEditClick, onDeleteClick})
             <p className="text-white mx-auto my-2 line-clamp-3 w-[90%]">{quiz.description}</p>
             <p className="text-white mx-auto mt-auto mb-2">{quiz.questionCount}</p>
             <div className="flex flex-row w-full mt-2 mb-4">
-                <GenericButton className="ml-4 mr-auto w-[25%] h-fit bg-green-500 shadow-green-700 shadow-md" onClick={onEditClick} text={"Edit"}></GenericButton>
-                <GenericButton className="mr-4 ml-auto w-[25%] h-fit bg-red-500 shadow-red-700 shadow-md" onClick={onDeleteClick} text={"Delete"}></GenericButton>
+                <GenericButton className="ml-4 mr-auto w-[25%] h-fit  bg-green-500 shadow-green-700 hover:bg-green-600 hover:shadow-green-800 shadow-md" onClick={onEditClick} text={"Edit"}></GenericButton>
+                <GenericButton className="mr-4 ml-auto w-[25%] h-fit bg-red-500 shadow-red-700 hover:bg-red-600 hover:shadow-red-800  shadow-md" onClick={onDeleteClick} text={"Delete"}></GenericButton>
             </div>
         </div>
     )

@@ -78,6 +78,8 @@ export default function LobbyScreen()
             await startConnection(user.jwtToken)
 
             onUserChange(async () => {
+
+                console.log("Message recieved - User changed!")
                 const callbackRouteLobby = "/Lobby/GetLobby/"
                 const callbackRouteSessions = "/Lobby/GetLobbySessions/"
 
@@ -113,6 +115,7 @@ export default function LobbyScreen()
             })
 
             onLobbyUpdated(async () => {
+                console.log("Message recieved - Lobby updated!")
                 const callbackRouteLobby = "/Lobby/GetLobby/"
                 await axios.get(APIUrl + callbackRouteLobby + lobbyID)
                 .then(response => {
@@ -126,6 +129,7 @@ export default function LobbyScreen()
             })
             
             onQuizStart(async () => {
+                console.log("Message recieved - Quiz started!")
                 const callbackRouteSessions = "/Lobby/GetLobbySessions/"
                 await axios.get(APIUrl + callbackRouteSessions + lobbyID)
                     .then(innerResponse => {
@@ -136,6 +140,7 @@ export default function LobbyScreen()
             })
 
             onBuzzRecieved((buzzerID) => {
+                console.log("Message recieved - Buzz recieved!")
                 if(user.id == buzzerID)
                 {
                     setInputDisabled(false)
@@ -146,7 +151,7 @@ export default function LobbyScreen()
 
             onIncorrectAnswerRecieved(async (wrongUserID) => {
                 setBuzzedID(-1)
-                
+                console.log("Message recieved - Incorrect answer recieved!")
                 const callbackRouteSessions = "/Lobby/GetLobbySessions/"
                 await axios.get(APIUrl + callbackRouteSessions + lobbyID)
                     .then(innerResponse => {
@@ -154,15 +159,18 @@ export default function LobbyScreen()
                         setSessions(innerResponse.data)
                         innerResponse.data.forEach(element => {
                             console.log(element)
-                            if(element.userID == user.id && element.incorrect == true)
+                            if(element.userID == user.id)
                             {
-                                console.log("I am disabled!")
-                                setBuzzDisabled(true)
-                            }
-                            else
-                            {
-                                console.log("I am enabled!")
-                                setBuzzDisabled(false)
+                                if(element.incorrect == true)
+                                {
+                                    console.log("I am disabled!")
+                                    setBuzzDisabled(true)
+                                }
+                                else
+                                {
+                                    console.log("I am enabled!")
+                                    setBuzzDisabled(false)
+                                }   
                             }
                         })
                     }
@@ -174,6 +182,7 @@ export default function LobbyScreen()
                 handleClearTime();
                 setBuzzedID(-1)
                 
+                console.log("Message recieved - Correct answer recieved!")
                 const callbackRouteSessions = "/Lobby/GetLobbySessions/"
                 await axios.get(APIUrl + callbackRouteSessions + lobbyID)
                     .then(innerResponse => {
@@ -189,9 +198,11 @@ export default function LobbyScreen()
 
             onGetNextQuestion(async (questionID) => {
                 handleClearTime();
+                console.log("Message recieved - Get next question!")
                 const questionRoute = "/Quiz/GetQuizQuestion/"
                 
                 setDisplayAnswerDisabled(true)
+                console.log("Got next question!")
                 setBuzzDisabled(false)
                 setInputDisabled(true)
 
@@ -206,12 +217,13 @@ export default function LobbyScreen()
             })
             
             onTimeoutRecieved((seconds) => {
+                console.log("Message recieved - Set timer!")
                 handleSetTime(seconds);
             })
 
             onTimedOut(async () => {
                 setTimerEnabled(false);
-
+                console.log("Message recieved - Times out!")
                 const callbackRouteSessions = "/Lobby/GetLobbySessions/"
 
                 await axios.get(APIUrl + callbackRouteSessions + lobbyID)
@@ -220,17 +232,45 @@ export default function LobbyScreen()
                         setSessions(innerResponse.data)
                     })
                 
+                var newLobby = lobby.copy()
+                newLobby.readyPlayers = 0
+                setLobby(newLobby)
+
                 setDisplayAnswerDisabled(false);
                 setBuzzDisabled(true);
                 setInputDisabled(true);
             })
             
-            onQuizEnded(() => {
+            onQuizEnded(async () => {
                 setQuizEnded(true)
+                console.log("Message recieved - Quiz ended!")
+                const callbackRouteSessions = "/Lobby/GetLobbySessions/"
+                await axios.get(APIUrl + callbackRouteSessions + lobbyID)
+                    .then(innerResponse => {
+                        console.log(innerResponse.data)
+                        setSessions(innerResponse.data)
+                    }
+                )
+                .catch(err => {
+                    console.log(err)
+                })
+
+                const callbackRouteLobby = "/Lobby/GetLobby/"
+                await axios.get(APIUrl + callbackRouteLobby + lobbyID)
+                .then(response => {
+                    setLobby(response.data)
+                    setIsEditingLobby(false)
+                    console.log(response)
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+
                 setTimerEnabled(false);
                 setDisplayAnswerDisabled(true);
                 setBuzzDisabled(true);
                 setInputDisabled(true);
+                setUserIsReady(false);
             })
 
             await joinLobby(response.data.id, user.id)
@@ -332,7 +372,7 @@ export default function LobbyScreen()
                                     <div className="flex flex-col w-full h-full">
                                         <DisplayLobbyInfo lobby={lobby} quiz={quiz} />
                                         <GenericButton className={(userIsReady ? "bg-blue-500 shadow-blue-700 hover:bg-blue-600 hover:shadow-blue-800" : "bg-red-500 shadow-red-700 hover:bg-red-600 hover:shadow-red-800") + "flex flex-auto mx-auto my-4 w-[90%] h-24 text-white shadow-md "} text={userIsReady ? "Ready" : "Unready"} onClick={handleReadyClick}></GenericButton>
-                                        {lobby.creatorID == user.id && <GenericButton disabled={lobby.readyPlayers < lobby.currentPlayers} className={(lobby.readyPlayers < lobby.currentPlayers ? "bg-gray-500 shadow-gray-700 " :"bg-red-500 shadow-red-700 hover:bg-red-600 hover:shadow-red-800 ") + "shadow-md flex flex-auto mx-auto my-4 w-[90%] h-24 text-white"} text={"Start Quiz"} onClick={handleStartQuiz}></GenericButton>}
+                                        {lobby.creatorID == user.id && <GenericButton disabled={(lobby.readyPlayers < lobby.currentPlayers || quiz == null)} className={((lobby.readyPlayers < lobby.currentPlayers || quiz == null) ? "bg-gray-500 shadow-gray-700 " :"bg-red-500 shadow-red-700 hover:bg-red-600 hover:shadow-red-800 ") + "shadow-md flex flex-auto mx-auto my-4 w-[90%] h-24 text-white"} text={"Start Quiz"} onClick={handleStartQuiz}></GenericButton>}
                                     </div>}
                                 {lobby && isEditingLobby && <EditLobbyInfo lobby={lobby} quiz={quiz} />}
                             </div>
