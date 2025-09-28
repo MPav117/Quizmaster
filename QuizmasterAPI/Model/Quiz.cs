@@ -16,8 +16,6 @@ namespace Quizmaster.Models
         public int QuestionCount { get; set; }
 
         public string? Description { get; set; }
-
-        [Required]
         public List<QuizQuestion>? Questions { get; }
 
         [ForeignKey("User")]

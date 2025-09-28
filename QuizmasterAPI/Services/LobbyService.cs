@@ -17,6 +17,29 @@ namespace Quizmaster.Services
             _configuration = configuration;
         }
 
+        public async Task<ReturnValue<Lobby>> GetLobby(int id)
+        {
+            Lobby? lobby = await _dbContext.Lobbies.Include(e => e.Quiz).FirstOrDefaultAsync(e => e.ID == id);
+
+            if (lobby == null)
+            {
+                return new ReturnValue<Lobby>()
+                {
+                    Code = HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Message = $"Failed to find lobby with id {id}"
+                };
+            }
+
+            return new ReturnValue<Lobby>()
+            {
+                Code = HttpStatusCode.OK,
+                IsError = false,
+                Value = lobby,
+                Message = "Successfully found lobby!"
+            };
+        }
+
         public async Task<ReturnValue<Lobby>> CreateLobby(Lobby lobby)
         {
             await _dbContext.Lobbies.AddAsync(lobby);
@@ -44,7 +67,7 @@ namespace Quizmaster.Services
                 };
             }
 
-             _dbContext.Lobbies.Remove(lobbyFromDatabase);
+            _dbContext.Lobbies.Remove(lobbyFromDatabase);
             await _dbContext.SaveChangesAsync();
 
             return new ReturnValue<Lobby>()
@@ -106,6 +129,7 @@ namespace Quizmaster.Services
                 };
             }
 
+            lobbyFromDatabase.Name = lobby.Name;
             lobbyFromDatabase.MaxPlayers = lobby.MaxPlayers;
             lobbyFromDatabase.IsPrivate = lobby.IsPrivate;
             lobbyFromDatabase.Description = lobby.Description;
@@ -121,6 +145,26 @@ namespace Quizmaster.Services
                 IsError = false,
                 Value = lobbyFromDatabase,
                 Message = $"Successfully updated quiz {lobbyFromDatabase.ID}"
+            };
+        }
+
+        public async Task<ReturnValue<List<LobbySession>>> GetLobbySessions(int lobbyID)
+        {
+            List<LobbySession> lobbySessions = await _dbContext.Sessions
+                .Include(s => s.User)
+                .Where(s => s.LobbyID == lobbyID).ToListAsync();
+
+            foreach (LobbySession session in lobbySessions)
+            {
+                session.User.Password = "";
+            }
+
+            return new ReturnValue<List<LobbySession>>()
+            {
+                Code = HttpStatusCode.OK,
+                IsError = false,
+                Value = lobbySessions,
+                Message = "Retrieved all the lobby sessions"
             };
         }
     }

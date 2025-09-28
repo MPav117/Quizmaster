@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Quizmaster.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ builder.Services.AddCors(options =>
         {
             policy.AllowAnyHeader()
                   .AllowAnyMethod()
-                  .WithOrigins("http://localhost:5500", // TODO: Srediti CORS.
+                  .WithOrigins("http://localhost:5500",
                             "https://localhost:5500",
                             "http://127.0.0.1:5500",
                             "https://127.0.0.1:5500",
@@ -29,7 +30,10 @@ builder.Services.AddCors(options =>
                             "https://localhost:3000",
                             "http://192.168.56.1:3000",
                             "http://127.0.0.1:3000",
-                            "https://127.0.0.1:3000")
+                            "https://127.0.0.1:3000",
+                            "http://26.7.33.111:3000",
+                            "https://26.7.33.111:3000"
+                            )
                   .AllowCredentials();
         });
     });
@@ -45,6 +49,10 @@ builder.Services.AddDbContext<DatabaseContext>(options => {
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ILobbyService, LobbyService>();
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddSignalR(options => { options.MaximumParallelInvocationsPerClient = 3; });
+
 
 if(jwtKey != null)
 {
@@ -94,5 +102,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseRouting();
 app.UseCors("CORS");
+app.MapHub<GameHub>("/gameHub");
 app.MapControllers();
 app.Run();

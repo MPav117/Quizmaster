@@ -241,48 +241,83 @@ namespace Quizmaster.Services
 
         public async Task<ReturnValue<List<QuizQuestion>>> UpdateQuizQuestions(List<QuizQuestion> questions)
         {
-            List<QuizQuestion> updatedQuizQuestions = new List<QuizQuestion>();
-            bool errorOccured = false;
-            foreach (QuizQuestion question in questions)
-            {
-                var updatedQuizQuestionResult = await UpdateQuizQuestion(question);
-                if (updatedQuizQuestionResult.IsError == false)
-                {
-                    updatedQuizQuestions.Add(updatedQuizQuestionResult.Value);
-                }
-                else
-                {
-                    errorOccured = true;
-                }
-            }
-
-            if (errorOccured)
-            {
-                return new ReturnValue<List<QuizQuestion>>()
-                {
-                    Code = HttpStatusCode.BadRequest,
-                    IsError = true,
-                    Value = updatedQuizQuestions,
-                    Message = $"Error occured during updating. Updated {updatedQuizQuestions.Count} questions."
-                };
-            }
-            else
+            if (questions.Count == 0)
             {
                 return new ReturnValue<List<QuizQuestion>>()
                 {
                     Code = HttpStatusCode.OK,
                     IsError = false,
-                    Value = updatedQuizQuestions,
-                    Message = $"Successfully updated {updatedQuizQuestions.Count} questions."
+                    Value = questions,
+                    Message = "No changes made."
                 };
             }
+
+            QuizQuestion quizQuestion = questions[0];
+            Quiz? quiz = await _dbContext.Quizzes.FindAsync(quizQuestion.QuizID);
+
+            if (quiz == null)
+            {
+                return new ReturnValue<List<QuizQuestion>>()
+                {
+                    Code = HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Message = "Quiz not found."
+                };
+            }
+
+            List<QuizQuestion> oldQuizQuestions = await _dbContext.Questions.Where(x => x.QuizID == quiz.ID).ToListAsync();
+            _dbContext.RemoveRange(oldQuizQuestions);
+            await _dbContext.SaveChangesAsync();
+
+            await _dbContext.AddRangeAsync(questions);
+            await _dbContext.SaveChangesAsync();
+
+            quiz.QuestionCount = questions.Count;
+            _dbContext.Quizzes.Update(quiz);
+            await _dbContext.SaveChangesAsync();
+
+            return new ReturnValue<List<QuizQuestion>>()
+            {
+                Code = HttpStatusCode.OK,
+                IsError = false,
+                Value = questions,
+                Message = "Successfully updated quiz questions."
+            };
         }
 
         public async Task<ReturnValue<List<QuizQuestion>>> CreateQuizQuestions(List<QuizQuestion> newQuizQuestions)
         {
+            if (newQuizQuestions.Count == 0)
+            {
+                return new ReturnValue<List<QuizQuestion>>()
+                {
+                    Code = HttpStatusCode.OK,
+                    IsError = false,
+                    Value = newQuizQuestions,
+                    Message = "No changes made."
+                };
+            }
+
+            QuizQuestion quizQuestion = newQuizQuestions[0];
+            Quiz? quiz = await _dbContext.Quizzes.FindAsync(quizQuestion.QuizID);
+
+            if (quiz == null)
+            {
+                return new ReturnValue<List<QuizQuestion>>()
+                {
+                    Code = HttpStatusCode.BadRequest,
+                    IsError = true,
+                    Message = "Quiz not found."
+                };
+            }
+
             await _dbContext.AddRangeAsync(newQuizQuestions);
             await _dbContext.SaveChangesAsync();
 
+            quiz.QuestionCount += newQuizQuestions.Count;
+            _dbContext.Quizzes.Update(quiz);
+            await _dbContext.SaveChangesAsync();
+            
             return new ReturnValue<List<QuizQuestion>>()
             {
                 Code = HttpStatusCode.OK,

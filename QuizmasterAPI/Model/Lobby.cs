@@ -10,7 +10,10 @@ namespace Quizmaster.Models
         public int ID { get; set; }
 
         [Required]
-        public int Name { get; set; }
+        public required string Name { get; set; }
+
+        [Required]
+        public int Status { get; set; }
 
         public bool IsPrivate { get; set; }
 
@@ -19,10 +22,14 @@ namespace Quizmaster.Models
         public string? Description { get; set; }
 
         [Required]
+        [Range(2, 4)]
         public int MaxPlayers { get; set; }
 
         [Required]
         public int CurrentPlayers { get; set; }
+
+        [Required]
+        public int ReadyPlayers { get; set; }
 
         [ForeignKey("Creator")]
         public int CreatorID { get; set; }
@@ -31,5 +38,11 @@ namespace Quizmaster.Models
         [ForeignKey("Quiz")]
         public int? QuizID { get; set; }
         public Quiz? Quiz { get; set; }
+
+        [JsonIgnore]
+        public List<LobbySession>? Sessions { get; }
+
+        [JsonIgnore]
+        public List<LobbyLog>? Logs { get; }
     }
 }

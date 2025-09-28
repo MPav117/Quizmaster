@@ -26,11 +26,13 @@ namespace Quizmaster.Models
 
         public string? ProfilePicture { get; set; }
 
-        [ForeignKey("InLobby")]
-        public int InLobbyID { get; set; }
-        public Lobby? InLobby { get; set; }
-
         [JsonIgnore]
         public List<Quiz>? Quizzes { get; set; }
+
+        [JsonIgnore]
+        public List<LobbyLog>? Logs { get; }
+
+        [JsonIgnore]
+        public List<LobbySession>? Sessions { get; }
     }
 }

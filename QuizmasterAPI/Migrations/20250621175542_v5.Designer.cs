@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Quizmaster.Models;
 
@@ -11,9 +12,11 @@ using Quizmaster.Models;
 namespace QuizmasterAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250621175542_v5")]
+    partial class v5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,17 +48,13 @@ namespace QuizmasterAPI.Migrations
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Name")
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .HasColumnType("longtext");
 
                     b.Property<int?>("QuizID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReadyPlayers")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -78,16 +77,13 @@ namespace QuizmasterAPI.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<bool>("Answered")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("LobbyID")
                         .HasColumnType("int");
 
                     b.Property<int>("QuestionID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserID")
+                    b.Property<int>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -109,23 +105,11 @@ namespace QuizmasterAPI.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("Answer")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ConnectionId")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("Incorrect")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("LobbyID")
                         .HasColumnType("int");
 
                     b.Property<int>("Points")
                         .HasColumnType("int");
-
-                    b.Property<bool>("Ready")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -182,21 +166,6 @@ namespace QuizmasterAPI.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("OfferedAnswer1")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OfferedAnswer2")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OfferedAnswer3")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OfferedAnswer4")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PointValue")
-                        .HasColumnType("int");
-
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -229,6 +198,9 @@ namespace QuizmasterAPI.Migrations
                     b.Property<int>("Experience")
                         .HasColumnType("int");
 
+                    b.Property<int>("InLobbyID")
+                        .HasColumnType("int");
+
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
@@ -244,6 +216,8 @@ namespace QuizmasterAPI.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("InLobbyID");
 
                     b.ToTable("Users");
                 });
@@ -281,7 +255,9 @@ namespace QuizmasterAPI.Migrations
 
                     b.HasOne("Quizmaster.Models.User", "User")
                         .WithMany("Logs")
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Lobby");
 
@@ -329,6 +305,17 @@ namespace QuizmasterAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("Quizmaster.Models.User", b =>
+                {
+                    b.HasOne("Quizmaster.Models.Lobby", "InLobby")
+                        .WithMany()
+                        .HasForeignKey("InLobbyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InLobby");
                 });
 
             modelBuilder.Entity("Quizmaster.Models.Lobby", b =>

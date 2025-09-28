@@ -10,7 +10,7 @@ using Quizmaster.Models;
 namespace Quizmaster.Controllers
 {
     [ApiController]
-    [Route("API/Lobby")]
+    [Route("API/Quiz")]
 
     public class QuizController : Controller
     {
@@ -58,7 +58,7 @@ namespace Quizmaster.Controllers
             return Ok(updatedQuiz.Value);
         }
 
-        [HttpDelete("DeleteQuiz")]
+        [HttpDelete("DeleteQuiz/{quizID}")]
         public async Task<ActionResult> DeleteQuiz(int quizID)
         {
             ReturnValue<Quiz> deletedQuiz = await _quizService.DeleteQuiz(quizID);
@@ -70,7 +70,7 @@ namespace Quizmaster.Controllers
             return Ok(deletedQuiz.Value);
         }
 
-        [HttpPost("CreateQuizQuestion")]
+        [HttpPost("CreateQuizQuestions")]
         public async Task<ActionResult> CreateQuizQuestions([FromBody] List<QuizQuestion> quizQuestions)
         {
             ReturnValue<List<QuizQuestion>> createdQuizQuestions = await _quizService.CreateQuizQuestions(quizQuestions);
@@ -89,7 +89,20 @@ namespace Quizmaster.Controllers
             return Ok(questions.Value);
         }
 
-        public async Task<ActionResult> UpdateQuizQuestions(List<QuizQuestion> quizQuestions)
+        [HttpGet("GetQuizQuestion/{id}")]
+        public async Task<ActionResult> GetQuizQuestion(int id)
+        {
+            ReturnValue<QuizQuestion> question = await _quizService.ReadQuizQuestion(id);
+            if (question.IsError == true)
+            {
+                return BadRequest(question.Message);
+            }
+
+            return Ok(question.Value);
+        }
+
+        [HttpPost("UpdateQuizQuestions")]
+        public async Task<ActionResult> UpdateQuizQuestions([FromBody]List<QuizQuestion> quizQuestions)
         {
             ReturnValue<List<QuizQuestion>> questions = await _quizService.UpdateQuizQuestions(quizQuestions);
             if (questions.IsError == true)
@@ -100,9 +113,10 @@ namespace Quizmaster.Controllers
             return Ok(questions.Value);
         }
 
-        public async Task<ActionResult> DeleteQuizQuestions(List<int> quizQuestionIDs)
+        [HttpDelete("DeleteQuizQuestion/{quizQuestionID}")]
+        public async Task<ActionResult> DeleteQuizQuestion(int quizQuestionID)
         {
-            ReturnValue<List<QuizQuestion>> deletedQuestions = await _quizService.DeleteQuizQuestions(quizQuestionIDs);
+            ReturnValue<QuizQuestion> deletedQuestions = await _quizService.DeleteQuizQuestion(quizQuestionID);
             if (deletedQuestions.IsError == true)
             {
                 return BadRequest(deletedQuestions.Message);
@@ -110,5 +124,18 @@ namespace Quizmaster.Controllers
 
             return Ok(deletedQuestions.Value);
         }
+
+        [HttpGet("GetAllQuizzesCreatedByUser/{userID}")]
+        public async Task<ActionResult> GetAllQuizzesCreatedByUser(int userID)
+        {
+            ReturnValue<List<Quiz>> quizzes = await _quizService.GetAllQuizzesCreatedByUser(userID);
+
+            if (quizzes.IsError == true)
+            {
+                return BadRequest(quizzes.Message);
+            }
+
+            return Ok(quizzes.Value);
+        }
     }
-}
+}   

@@ -15,13 +15,26 @@ namespace Quizmaster.Models
         [Required]
         public required string Answer { get; set; }
 
+        public string? OfferedAnswer1 { get; set; }
+        public string? OfferedAnswer2 { get; set; }
+        public string? OfferedAnswer3 { get; set; }
+        public string? OfferedAnswer4 { get; set; }
+
         [Required]
         public required int QuestionType { get; set; }
 
+        [Required]
+        public required int PointValue { get; set; }
+        
         public string? Image { get; set; }
 
         [ForeignKey("Quiz")]
         public int QuizID { get; set; }
+
+        [JsonIgnore]
         public Quiz? Quiz { get; set; }
+
+        [JsonIgnore]
+        public List<LobbyLog>? Logs { get; }
     }
 }

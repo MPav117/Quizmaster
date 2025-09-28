@@ -24,7 +24,7 @@ namespace Quizmaster.Controllers
             var result = await _authService.Login(UserInfo);
             if (result.IsError == false)
             {
-                return Ok(result);
+                return Ok(result.Value);
             }
             else
             {
